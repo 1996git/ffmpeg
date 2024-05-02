@@ -104,20 +104,20 @@ class VideoAnalyzer:
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
 
-def merge_videos(video_analyzers):
+def merge_videos(video_analyzers,duration,resolution):
     global selected_video_paths
     if len(selected_video_paths) >= 1:
         print("Merging videos...")
         caps = [cv2.VideoCapture(video_path) for video_path in selected_video_paths]
-
-        
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         output_video = cv2.VideoWriter('output_video.mp4', fourcc, 30.0, (FRAME_WIDTH * 2, FRAME_HEIGHT * 2))
 
+        start_time = time.time()
+        end_time = start_time + duration
         labels = [video_analyzer.get_input_text() for video_analyzer in video_analyzers]
 
         # 動画の再生と保存
-        while True:
+        while time.time()<end_time:
             frames = []
             for i, cap in enumerate(caps):
                 ret, frame = cap.read()
@@ -143,6 +143,7 @@ def merge_videos(video_analyzers):
                 output_frame = np.vstack([np.hstack([frame1, frame2]), np.hstack([frame3, frame4])])
 
             output_video.write(output_frame)
+            resized_frame = cv2.resize(output_frame,resolution)
             cv2.imshow("Video", output_frame)
 
             # ウィンドウを閉じるボタンが押された場合にウィンドウを閉じる
